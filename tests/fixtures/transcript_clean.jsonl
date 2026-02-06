@@ -1,0 +1,5 @@
+{"role": "user", "content": "Can you add a docstring to the calculate function?"}
+{"role": "assistant", "content": [{"type": "text", "text": "Sure, I'll add a docstring."}]}
+{"role": "assistant", "content": [{"type": "tool_use", "name": "Edit", "input": {"file": "math_utils.py"}}]}
+{"role": "assistant", "content": [{"type": "tool_result", "content": "File edited successfully"}]}
+{"role": "user", "content": "Perfect, thanks!"}

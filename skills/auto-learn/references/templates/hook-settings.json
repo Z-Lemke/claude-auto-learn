@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "<HookType>": [
+      {
+        "matcher": "<tool-pattern-if-needed>",
+        "command": ".claude/hooks/<script-name>.sh"
+      }
+    ]
+  }
+}

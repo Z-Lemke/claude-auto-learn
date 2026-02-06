@@ -1,0 +1,6 @@
+{"role": "user", "content": "Can you add a new API endpoint?"}
+{"role": "assistant", "content": [{"type": "text", "text": "Sure, I'll create a new endpoint."}]}
+{"role": "user", "content": "FYI, in this project we use FastAPI with the router pattern. Each domain has its own router file in src/routers/. Our convention is to prefix all routes with /api/v2."}
+{"role": "assistant", "content": [{"type": "text", "text": "Thanks for the context! I'll follow that pattern."}]}
+{"role": "user", "content": "Also, the team uses pydantic v2 models in src/models/ for request/response schemas. We always validate inputs."}
+{"role": "assistant", "content": [{"type": "text", "text": "Got it, I'll create the pydantic models first."}]}

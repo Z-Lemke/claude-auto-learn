@@ -1,0 +1,5 @@
+## [Date] - [Brief Title]
+- **Trigger**: [What happened that revealed the gap]
+- **Type**: [CLAUDE.md | Hook | Skill | Settings]
+- **Change**: [What was added/modified]
+- **File(s)**: [Which files were changed]

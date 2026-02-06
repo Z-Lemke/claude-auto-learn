@@ -1,0 +1,9 @@
+{"role": "user", "content": "Run the build"}
+{"role": "assistant", "content": [{"type": "tool_use", "name": "Bash", "input": {"command": "npm run build"}}]}
+{"role": "assistant", "content": [{"type": "tool_result", "content": "error: TypeScript compilation failed"}]}
+{"role": "assistant", "content": [{"type": "tool_use", "name": "Bash", "input": {"command": "npm run build"}}]}
+{"role": "assistant", "content": [{"type": "tool_result", "content": "error: Cannot find module 'lodash'"}]}
+{"role": "assistant", "content": [{"type": "tool_use", "name": "Bash", "input": {"command": "npm install lodash"}]}
+{"role": "assistant", "content": [{"type": "tool_result", "content": "added 1 package"}]}
+{"role": "assistant", "content": [{"type": "tool_use", "name": "Bash", "input": {"command": "npm run build"}}]}
+{"role": "assistant", "content": [{"type": "tool_result", "content": "error: Type 'string' is not assignable to type 'number'"}]}

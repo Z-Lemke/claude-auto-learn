@@ -1,0 +1,13 @@
+{
+  "name": "auto-claude-builder",
+  "owner": {
+    "name": "Z-Lemke"
+  },
+  "plugins": [
+    {
+      "name": "auto-claude-builder",
+      "source": "./",
+      "description": "Automatically improves .claude configuration based on learned experiences during coding sessions"
+    }
+  ]
+}

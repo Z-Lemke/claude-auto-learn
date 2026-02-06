@@ -1,0 +1,10 @@
+{"role": "user", "content": "Can you set up the test runner for this project?"}
+{"role": "assistant", "content": [{"type": "text", "text": "I'll set up Jest for testing."}]}
+{"role": "assistant", "content": [{"type": "tool_use", "name": "Bash", "input": {"command": "npm install jest"}}]}
+{"role": "assistant", "content": [{"type": "tool_result", "content": "added 250 packages"}]}
+{"role": "user", "content": "No, we use pytest in this project, not Jest. We're a Python shop."}
+{"role": "assistant", "content": [{"type": "text", "text": "Sorry about that! Let me set up pytest instead."}]}
+{"role": "assistant", "content": [{"type": "tool_use", "name": "Bash", "input": {"command": "pip install pytest"}}]}
+{"role": "assistant", "content": [{"type": "tool_result", "content": "Successfully installed pytest-7.4.0"}]}
+{"role": "user", "content": "Also, in this project we always run tests with pytest tests/ -v --tb=short"}
+{"role": "assistant", "content": [{"type": "text", "text": "Got it, I'll use that command going forward."}]}

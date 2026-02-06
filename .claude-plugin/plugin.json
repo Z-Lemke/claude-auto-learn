@@ -1,0 +1,10 @@
+{
+  "name": "auto-claude-builder",
+  "version": "0.1.0",
+  "description": "Automatically improves .claude configuration based on learned experiences during coding sessions",
+  "author": {
+    "name": "Z-Lemke"
+  },
+  "repository": "https://github.com/Z-Lemke/auto-claude-builder",
+  "license": "MIT"
+}
