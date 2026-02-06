@@ -30,7 +30,8 @@ The auto-learn system detects four types of learning opportunities:
 Install as a Claude Code plugin:
 
 ```bash
-claude plugin add Z-Lemke/auto-claude-builder
+claude plugin marketplace add Z-Lemke/auto-claude-builder
+claude plugin install auto-claude-builder
 ```
 
 ## Setup
