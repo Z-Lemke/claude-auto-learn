@@ -34,8 +34,8 @@ fi
 # Find the detect script from the plugin installation
 DETECT_SCRIPT=""
 SEARCH_PATHS=(
-    "${HOME}/.claude/plugins/auto-claude-builder/skills/auto-learn/scripts/detect-learning-opportunity.py"
-    "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins/auto-claude-builder/skills/auto-learn/scripts/detect-learning-opportunity.py"
+    "${HOME}/.claude/plugins/claude-auto-learn/skills/auto-learn/scripts/detect-learning-opportunity.py"
+    "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins/claude-auto-learn/skills/auto-learn/scripts/detect-learning-opportunity.py"
 )
 
 for p in "${SEARCH_PATHS[@]}"; do

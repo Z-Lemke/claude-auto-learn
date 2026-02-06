@@ -32,7 +32,7 @@ chmod +x .claude/hooks/stop-and-learn.sh
 ```
 
 If the `cp` source path does not resolve (plugin may be installed elsewhere), locate the plugin's `hooks/templates/stop-and-learn.sh` by checking these paths in order:
-1. `$HOME/.claude/plugins/auto-claude-builder/hooks/templates/stop-and-learn.sh`
+1. `$HOME/.claude/plugins/claude-auto-learn/hooks/templates/stop-and-learn.sh`
 2. Relative to the plugin installation directory
 
 ### Step 4: Register the Hook in Settings

@@ -1,4 +1,4 @@
-# auto-claude-builder
+# claude-auto-learn
 
 A Claude Code plugin that automatically improves repository-level `.claude` configuration based on learned experiences.
 
@@ -30,8 +30,8 @@ The auto-learn system detects four types of learning opportunities:
 Install as a Claude Code plugin:
 
 ```bash
-claude plugin marketplace add Z-Lemke/auto-claude-builder
-claude plugin install auto-claude-builder
+claude plugin marketplace add Z-Lemke/claude-auto-learn
+claude plugin install claude-auto-learn
 ```
 
 ## Setup
@@ -84,7 +84,7 @@ Changes are committed to the repo and go through normal code review.
 ## Architecture
 
 ```
-auto-claude-builder/
+claude-auto-learn/
   .claude-plugin/
     plugin.json          # Plugin manifest
     marketplace.json     # Marketplace registration

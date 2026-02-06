@@ -1,4 +1,4 @@
-"""Shared fixtures for auto-claude-builder tests."""
+"""Shared fixtures for claude-auto-learn tests."""
 
 import os
 from pathlib import Path

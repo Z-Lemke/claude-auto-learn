@@ -1,4 +1,4 @@
-# auto-claude-builder Development Guide
+# claude-auto-learn Development Guide
 
 ## Project Structure
 
@@ -25,7 +25,7 @@ hooks/templates/       Hook script templates installed into target projects
 
 To test the plugin locally, install it in a test project:
 ```bash
-claude plugin add /path/to/auto-claude-builder
+claude plugin add /path/to/claude-auto-learn
 ```
 
 Then in the test project:

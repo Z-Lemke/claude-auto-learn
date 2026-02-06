@@ -34,7 +34,7 @@ class TestPluginManifest:
     def test_plugin_json_name_matches(self):
         with open(REPO_ROOT / ".claude-plugin" / "plugin.json") as f:
             data = json.load(f)
-        assert data["name"] == "auto-claude-builder"
+        assert data["name"] == "claude-auto-learn"
 
     def test_plugin_json_repository_is_string(self):
         with open(REPO_ROOT / ".claude-plugin" / "plugin.json") as f:

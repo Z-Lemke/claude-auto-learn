@@ -1,11 +1,11 @@
 {
-  "name": "auto-claude-builder",
+  "name": "claude-auto-learn",
   "owner": {
     "name": "Z-Lemke"
   },
   "plugins": [
     {
-      "name": "auto-claude-builder",
+      "name": "claude-auto-learn",
       "source": "./",
       "description": "Automatically improves .claude configuration based on learned experiences during coding sessions"
     }
