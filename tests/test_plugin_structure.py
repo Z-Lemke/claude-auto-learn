@@ -122,23 +122,50 @@ class TestSkillStructure:
 
 
 class TestCommandStructure:
-    @pytest.mark.parametrize("command_file", ["learn.md", "setup-auto-learn.md"])
-    def test_command_exists(self, command_file):
-        assert (REPO_ROOT / "commands" / command_file).exists()
+    def test_learn_command_exists(self):
+        assert (REPO_ROOT / "commands" / "learn.md").exists()
 
-    @pytest.mark.parametrize("command_file", ["learn.md", "setup-auto-learn.md"])
-    def test_command_has_frontmatter(self, command_file):
-        content = (REPO_ROOT / "commands" / command_file).read_text()
-        assert content.startswith("---"), f"{command_file} must start with YAML frontmatter"
+    def test_learn_command_has_frontmatter(self):
+        content = (REPO_ROOT / "commands" / "learn.md").read_text()
+        assert content.startswith("---"), "learn.md must start with YAML frontmatter"
         parts = content.split("---", 2)
         assert len(parts) >= 3
 
-    @pytest.mark.parametrize("command_file", ["learn.md", "setup-auto-learn.md"])
-    def test_command_has_description(self, command_file):
-        content = (REPO_ROOT / "commands" / command_file).read_text()
+    def test_learn_command_has_description(self):
+        content = (REPO_ROOT / "commands" / "learn.md").read_text()
         frontmatter_text = content.split("---", 2)[1]
         frontmatter = yaml.safe_load(frontmatter_text)
         assert "description" in frontmatter
+
+
+class TestHooksJson:
+    def test_hooks_json_exists(self):
+        assert (REPO_ROOT / "hooks" / "hooks.json").exists()
+
+    def test_hooks_json_is_valid_json(self):
+        with open(REPO_ROOT / "hooks" / "hooks.json") as f:
+            data = json.load(f)
+        assert isinstance(data, dict)
+
+    def test_hooks_json_has_hooks_key(self):
+        with open(REPO_ROOT / "hooks" / "hooks.json") as f:
+            data = json.load(f)
+        assert "hooks" in data
+
+    def test_hooks_json_has_stop_hook(self):
+        with open(REPO_ROOT / "hooks" / "hooks.json") as f:
+            data = json.load(f)
+        assert "Stop" in data["hooks"]
+        assert isinstance(data["hooks"]["Stop"], list)
+        assert len(data["hooks"]["Stop"]) >= 1
+
+    def test_hooks_json_stop_hook_references_template(self):
+        with open(REPO_ROOT / "hooks" / "hooks.json") as f:
+            data = json.load(f)
+        hook_entry = data["hooks"]["Stop"][0]
+        assert "hooks" in hook_entry
+        command = hook_entry["hooks"][0]["command"]
+        assert "stop-and-learn.sh" in command
 
 
 class TestScriptFiles:
@@ -167,6 +194,11 @@ class TestScriptFiles:
     def test_stop_hook_has_safety_flags(self):
         content = (REPO_ROOT / "hooks" / "templates" / "stop-and-learn.sh").read_text()
         assert "set -euo pipefail" in content
+
+    def test_stop_hook_uses_path_derivation(self):
+        content = (REPO_ROOT / "hooks" / "templates" / "stop-and-learn.sh").read_text()
+        assert 'SCRIPT_DIR=' in content, "stop-and-learn.sh must derive paths from its own location"
+        assert 'PLUGIN_ROOT=' in content
 
 
 class TestReferenceTemplates:
@@ -261,14 +293,6 @@ class TestNoInlineScripts:
             elif in_block:
                 block_lines += 1
         return max_block
-
-    def test_setup_command_no_large_inline_bash(self):
-        path = REPO_ROOT / "commands" / "setup-auto-learn.md"
-        max_block = self._max_code_block_lines(path, "bash")
-        assert max_block <= 5, (
-            f"setup-auto-learn.md has a bash block of {max_block} lines. "
-            "Inline scripts should be extracted to actual files."
-        )
 
     def test_skill_md_no_large_inline_bash(self):
         path = REPO_ROOT / "skills" / "auto-learn" / "SKILL.md"

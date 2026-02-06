@@ -34,21 +34,13 @@ claude plugin marketplace add Z-Lemke/claude-auto-learn
 claude plugin install claude-auto-learn
 ```
 
-## Setup
-
-After installing the plugin, set up automatic learning in your project:
-
-```
-/setup-auto-learn
-```
-
-This installs a Stop hook that analyzes each session for learning opportunities. When opportunities are detected, Claude automatically continues the session to analyze and update `.claude` configuration.
+That's it. The plugin's Stop hook auto-registers when the plugin is enabled -- no per-project setup needed.
 
 ## Usage
 
 ### Automatic Mode
 
-Once hooks are installed via `/setup-auto-learn`, the plugin works autonomously:
+Once the plugin is installed, it works autonomously in every project:
 
 1. You work with Claude normally
 2. At the end of each response, the stop hook checks for learning opportunities
@@ -61,10 +53,10 @@ Once hooks are installed via `/setup-auto-learn`, the plugin works autonomously:
 You can also trigger learning analysis manually at any point:
 
 ```
-/learn
+/claude-auto-learn:learn
 ```
 
-This analyzes the current session and applies any learnings to `.claude` configuration.
+Or just say "learn", "remember this", or "update claude config" naturally -- the skill's trigger phrases handle this without needing a slash command.
 
 ## What Gets Created
 
@@ -95,10 +87,10 @@ claude-auto-learn/
         detect-learning-opportunity.py  # Transcript analysis
   commands/
     learn.md             # /learn - manual trigger
-    setup-auto-learn.md  # /setup-auto-learn - install hooks
   hooks/
+    hooks.json           # Plugin-level hook declaration (auto-registers)
     templates/
-      stop-and-learn.sh  # Stop hook template
+      stop-and-learn.sh  # Stop hook script
 ```
 
 ### Components
@@ -109,9 +101,9 @@ claude-auto-learn/
 
 - **stop-and-learn.sh**: Stop hook that fires at the end of each Claude response. Runs the detection script and returns `{"continue": true}` when a learning opportunity is found.
 
-- **/learn command**: Manual trigger for learning analysis.
+- **/claude-auto-learn:learn command**: Manual trigger for learning analysis.
 
-- **/setup-auto-learn command**: One-time setup that installs the stop hook in a project.
+- **hooks/hooks.json**: Declares the Stop hook at the plugin level so it auto-registers when the plugin is enabled.
 
 ## License
 

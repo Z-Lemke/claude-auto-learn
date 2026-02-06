@@ -8,7 +8,7 @@ set -euo pipefail
 # sharing). If opportunities are detected, signals Claude to continue the
 # session for automatic .claude configuration updates.
 #
-# Install: /setup-auto-learn (or copy this to .claude/hooks/ and register in settings.json)
+# Registered automatically via hooks/hooks.json when the plugin is enabled.
 #
 # Exit codes:
 #   0 - always (Stop hooks should not block)
@@ -31,21 +31,12 @@ if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
     exit 0
 fi
 
-# Find the detect script from the plugin installation
-DETECT_SCRIPT=""
-SEARCH_PATHS=(
-    "${HOME}/.claude/plugins/claude-auto-learn/skills/auto-learn/scripts/detect-learning-opportunity.py"
-    "${CLAUDE_PROJECT_DIR:-.}/.claude/plugins/claude-auto-learn/skills/auto-learn/scripts/detect-learning-opportunity.py"
-)
+# Derive detect script path from this script's location
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+DETECT_SCRIPT="$PLUGIN_ROOT/skills/auto-learn/scripts/detect-learning-opportunity.py"
 
-for p in "${SEARCH_PATHS[@]}"; do
-    if [ -f "$p" ]; then
-        DETECT_SCRIPT="$p"
-        break
-    fi
-done
-
-if [ -n "$DETECT_SCRIPT" ]; then
+if [ -f "$DETECT_SCRIPT" ]; then
     # Use the full detection script
     if python3 "$DETECT_SCRIPT" "$TRANSCRIPT_PATH" >/dev/null 2>&1; then
         echo '{"continue": true}'
