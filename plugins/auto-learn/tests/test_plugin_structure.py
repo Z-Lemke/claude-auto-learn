@@ -34,7 +34,7 @@ class TestPluginManifest:
     def test_plugin_json_name_matches(self):
         with open(REPO_ROOT / ".claude-plugin" / "plugin.json") as f:
             data = json.load(f)
-        assert data["name"] == "claude-auto-learn"
+        assert data["name"] == "auto-learn"
 
     def test_plugin_json_repository_is_string(self):
         with open(REPO_ROOT / ".claude-plugin" / "plugin.json") as f:
@@ -44,28 +44,31 @@ class TestPluginManifest:
 
 
 class TestMarketplaceManifest:
+    """Marketplace manifest lives at the monorepo root."""
+
+    MONOREPO_ROOT = REPO_ROOT.parent.parent
+
     def test_marketplace_json_exists(self):
-        assert (REPO_ROOT / ".claude-plugin" / "marketplace.json").exists()
+        assert (self.MONOREPO_ROOT / ".claude-plugin" / "marketplace.json").exists()
 
     def test_marketplace_json_is_valid_json(self):
-        with open(REPO_ROOT / ".claude-plugin" / "marketplace.json") as f:
+        with open(self.MONOREPO_ROOT / ".claude-plugin" / "marketplace.json") as f:
             data = json.load(f)
         assert isinstance(data, dict)
 
     def test_marketplace_json_required_fields(self):
-        with open(REPO_ROOT / ".claude-plugin" / "marketplace.json") as f:
+        with open(self.MONOREPO_ROOT / ".claude-plugin" / "marketplace.json") as f:
             data = json.load(f)
         assert "name" in data
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
         assert len(data["plugins"]) >= 1
 
-    def test_marketplace_name_matches_plugin(self):
-        with open(REPO_ROOT / ".claude-plugin" / "plugin.json") as f:
-            plugin = json.load(f)
-        with open(REPO_ROOT / ".claude-plugin" / "marketplace.json") as f:
+    def test_marketplace_lists_this_plugin(self):
+        with open(self.MONOREPO_ROOT / ".claude-plugin" / "marketplace.json") as f:
             marketplace = json.load(f)
-        assert marketplace["name"] == plugin["name"]
+        plugin_names = [p["name"] for p in marketplace["plugins"]]
+        assert "auto-learn" in plugin_names
 
 
 class TestSkillStructure:

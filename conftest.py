@@ -1,14 +1,11 @@
-"""Shared fixtures for claude-auto-learn tests."""
+"""Shared fixtures for llm-toolkit tests."""
 
-import os
 from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).parent.parent
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
-SCRIPTS_DIR = REPO_ROOT / "skills" / "auto-learn" / "scripts"
-HOOKS_DIR = REPO_ROOT / "hooks" / "templates"
+REPO_ROOT = Path(__file__).parent
+FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures"
 
 
 @pytest.fixture
@@ -49,16 +46,6 @@ def transcript_empty():
 @pytest.fixture
 def transcript_many_failures():
     return FIXTURES_DIR / "transcript_many_failures.jsonl"
-
-
-@pytest.fixture
-def detect_script():
-    return SCRIPTS_DIR / "detect-learning-opportunity.py"
-
-
-@pytest.fixture
-def stop_hook():
-    return HOOKS_DIR / "stop-and-learn.sh"
 
 
 @pytest.fixture

@@ -1,0 +1,10 @@
+{
+  "name": "safety-judge",
+  "version": "0.1.0",
+  "description": "PreToolUse safety hook with permission rules and LLM-as-judge for secure autonomous operation",
+  "author": {
+    "name": "Z-Lemke"
+  },
+  "repository": "https://github.com/Z-Lemke/llm-toolkit",
+  "license": "MIT"
+}

@@ -1,13 +1,23 @@
 {
-  "name": "claude-auto-learn",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "llm-toolkit",
+  "version": "1.0.0",
+  "description": "A collection of Claude Code plugins for automated learning, safety, and development workflows",
   "owner": {
     "name": "Z-Lemke"
   },
   "plugins": [
     {
-      "name": "claude-auto-learn",
-      "source": "./",
-      "description": "Automatically improves .claude configuration based on learned experiences during coding sessions"
+      "name": "auto-learn",
+      "description": "Automatically improves .claude configuration based on learned experiences during coding sessions",
+      "source": "./plugins/auto-learn",
+      "category": "learning"
+    },
+    {
+      "name": "safety-judge",
+      "description": "PreToolUse safety hook with permission rules and LLM-as-judge for secure autonomous operation",
+      "source": "./plugins/safety-judge",
+      "category": "security"
     }
   ]
 }
