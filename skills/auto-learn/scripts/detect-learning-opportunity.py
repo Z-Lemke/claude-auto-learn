@@ -67,8 +67,17 @@ def read_transcript(path):
 
 
 def extract_text(entry):
-    """Extract readable text from a transcript entry."""
-    content = entry.get("content", "")
+    """Extract readable text from a transcript entry.
+
+    Handles both flat format (unit test fixtures):
+        {"role": "user", "content": "hello"}
+    and nested format (real CLI transcripts):
+        {"type": "user", "message": {"role": "user", "content": "hello"}}
+    """
+    content = entry.get("content")
+    if content is None:
+        # Real CLI transcripts nest content under entry["message"]["content"]
+        content = entry.get("message", {}).get("content", "")
     if isinstance(content, str):
         return content
     if isinstance(content, list):
@@ -109,8 +118,10 @@ def detect_repeated_failures(entries):
     failures = []
 
     for i, entry in enumerate(entries):
-        # Look for tool use entries
-        content = entry.get("content", [])
+        # Look for tool use entries (handle both flat and nested formats)
+        content = entry.get("content")
+        if content is None:
+            content = entry.get("message", {}).get("content", [])
         if not isinstance(content, list):
             continue
 

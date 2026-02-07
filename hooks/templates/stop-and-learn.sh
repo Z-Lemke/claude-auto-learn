@@ -75,7 +75,9 @@ try:
         role = entry.get('role', entry.get('type', ''))
         if role not in ('user', 'human'):
             continue
-        content = entry.get('content', '')
+        content = entry.get('content')
+        if content is None:
+            content = entry.get('message', {}).get('content', '')
         if isinstance(content, list):
             content = ' '.join(
                 b.get('text', '') if isinstance(b, dict) else str(b)

@@ -236,3 +236,86 @@ class TestCLI:
         assert "context_shared" in parsed
         assert "tool_failures" in parsed
         assert "details" in parsed
+
+
+class TestNestedTranscriptFormat:
+    """Test detection against the real CLI transcript format (nested messages).
+
+    Real transcripts wrap content under entry["message"]["content"] rather
+    than top-level entry["content"]. These tests verify the parser handles both.
+    """
+
+    def test_extract_text_nested_string(self):
+        entry = {"type": "user", "message": {"role": "user", "content": "hello"}}
+        assert detect_module.extract_text(entry) == "hello"
+
+    def test_extract_text_nested_list(self):
+        entry = {
+            "type": "assistant",
+            "message": {
+                "role": "assistant",
+                "content": [{"type": "text", "text": "hello"}, {"type": "text", "text": "world"}],
+            },
+        }
+        assert detect_module.extract_text(entry) == "hello world"
+
+    def test_extract_text_flat_still_works(self):
+        """Flat format (test fixtures) should still work after the fix."""
+        assert detect_module.extract_text({"content": "hello"}) == "hello"
+        assert detect_module.extract_text({"role": "user", "content": "hello"}) == "hello"
+
+    def test_corrections_detected_nested(self, transcript_corrections_nested):
+        entries = detect_module.read_transcript(str(transcript_corrections_nested))
+        corrections = detect_module.detect_corrections(entries)
+        assert len(corrections) >= 1, (
+            f"Expected corrections in nested transcript. "
+            f"Entries: {len(entries)}, roles: {[e.get('type') for e in entries]}"
+        )
+
+    def test_context_sharing_detected_nested(self, transcript_corrections_nested):
+        entries = detect_module.read_transcript(str(transcript_corrections_nested))
+        context = detect_module.detect_context_sharing(entries)
+        assert len(context) >= 1, "Expected context sharing in nested transcript"
+
+    def test_clean_nested_no_corrections(self, transcript_clean_nested):
+        entries = detect_module.read_transcript(str(transcript_clean_nested))
+        corrections = detect_module.detect_corrections(entries)
+        assert len(corrections) == 0
+
+    def test_analyze_nested_transcript(self, transcript_corrections_nested):
+        result = detect_module.analyze_transcript(str(transcript_corrections_nested))
+        assert result is not None
+        assert result["corrections"] >= 1
+
+    def test_analyze_clean_nested_returns_none(self, transcript_clean_nested):
+        result = detect_module.analyze_transcript(str(transcript_clean_nested))
+        assert result is None
+
+    def test_cli_nested_exits_0(self, transcript_corrections_nested):
+        code, stdout, _ = run_detect(transcript_corrections_nested)
+        assert code == 0
+        result = json.loads(stdout)
+        assert result["corrections"] >= 1
+
+    def test_cli_clean_nested_exits_1(self, transcript_clean_nested):
+        code, _, _ = run_detect(transcript_clean_nested)
+        assert code == 1
+
+    def test_correction_patterns_nested(self, tmp_transcript):
+        """Correction phrases should be detected in nested format entries."""
+        test_cases = [
+            "No, we should use yarn instead",
+            "That's not how it works here",
+            "In this project we use tabs",
+        ]
+        for phrase in test_cases:
+            entry = {
+                "type": "user",
+                "message": {"role": "user", "content": phrase},
+                "uuid": "test",
+                "timestamp": "2026-01-01T00:00:00Z",
+            }
+            path = tmp_transcript([entry])
+            entries = detect_module.read_transcript(str(path))
+            corrections = detect_module.detect_corrections(entries)
+            assert len(corrections) >= 1, f"Failed to detect nested correction: {phrase}"

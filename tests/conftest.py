@@ -62,6 +62,16 @@ def stop_hook():
 
 
 @pytest.fixture
+def transcript_corrections_nested():
+    return FIXTURES_DIR / "transcript_corrections_nested.jsonl"
+
+
+@pytest.fixture
+def transcript_clean_nested():
+    return FIXTURES_DIR / "transcript_clean_nested.jsonl"
+
+
+@pytest.fixture
 def tmp_transcript(tmp_path):
     """Factory fixture for creating temporary transcript files."""
     def _make(lines):
