@@ -279,6 +279,90 @@ Respond ONLY with JSON:
             return False, f"LLM judge error: {e}", "unknown"
 
 
+class WriteSafetyEvaluator:
+    """Evaluates Write tool calls for potentially dangerous file content.
+
+    Strategy: Check file extensions to determine if content should be evaluated,
+    then use regex + LLM judge to detect malicious patterns.
+    """
+
+    # File extensions that warrant content inspection
+    SUSPICIOUS_EXTENSIONS = [".sh", ".bash", ".py", ".rb", ".pl", ".js", ".ts"]
+
+    # Quick regex patterns for obvious threats in file content
+    DANGEROUS_PATTERNS = [
+        r"rm\s+-rf\s+/",  # Root deletion
+        r"DROP\s+DATABASE",  # SQL destruction
+        r"curl.*\$\(",  # Command substitution in curl (potential exfil)
+        r"wget.*\$\(",  # Command substitution in wget
+        r"nc\s+.*\d+",  # Netcat usage (potential exfil)
+        r"eval\s*\(",  # Eval usage (potential code injection)
+    ]
+
+    @staticmethod
+    def should_evaluate_content(file_path: str) -> bool:
+        """Check if file extension warrants content inspection."""
+        return any(file_path.endswith(ext) for ext in WriteSafetyEvaluator.SUSPICIOUS_EXTENSIONS)
+
+    @staticmethod
+    def check_content(
+        content: str, file_path: str, llm_judge: LLMJudge
+    ) -> Tuple[bool, str]:
+        """Evaluate file content for malicious patterns.
+
+        Returns (is_safe, reason) where is_safe=False means escalate to 'ask'.
+        """
+        # First: Quick regex check
+        for pattern in WriteSafetyEvaluator.DANGEROUS_PATTERNS:
+            if re.search(pattern, content, re.IGNORECASE):
+                return False, f"Suspicious pattern in {file_path}: {pattern}"
+
+        # Second: LLM judge for semantic analysis
+        if llm_judge.available:
+            is_safe, reason, risk = llm_judge.judge(
+                "Write", {"file_path": file_path, "content": content}
+            )
+            if not is_safe:
+                return False, f"LLM flagged Write content ({risk} risk): {reason}"
+
+        return True, "No suspicious patterns detected"
+
+
+class NotebookSafetyEvaluator:
+    """Evaluates NotebookEdit tool calls for dangerous cell content.
+
+    Notebooks can execute bash commands via !command syntax, so we need to
+    evaluate cell content similar to Bash tool evaluation.
+    """
+
+    @staticmethod
+    def check_cell_content(
+        cell_source: str, llm_judge: LLMJudge
+    ) -> Tuple[bool, str]:
+        """Evaluate notebook cell for dangerous patterns.
+
+        Returns (is_safe, reason) where is_safe=False means escalate to 'ask'.
+        """
+        # Check for bash execution patterns (!command)
+        if cell_source.strip().startswith("!"):
+            bash_command = cell_source[1:].strip()
+
+            # Evaluate bash command using regex denylist
+            danger = RegexDenylist.check(bash_command)
+            if danger:
+                return False, f"Dangerous bash command in cell: {danger}"
+
+        # LLM judge for general code safety (network requests, file operations)
+        if llm_judge.available:
+            is_safe, reason, risk = llm_judge.judge(
+                "NotebookEdit", {"cell_source": cell_source}
+            )
+            if not is_safe:
+                return False, f"LLM flagged notebook cell ({risk} risk): {reason}"
+
+        return True, "Cell content appears safe"
+
+
 def enforce_permissions(
     tool_name: str,
     tool_input: Dict,
@@ -309,6 +393,28 @@ def enforce_permissions(
         danger = RegexDenylist.check(command)
         if danger:
             return "deny", f"Blocked by safety denylist: {danger}"
+
+    # Step 1b: Write tool content evaluation
+    if tool_name == "Write":
+        file_path = tool_input.get("file_path", "")
+        content = tool_input.get("content", "")
+
+        if WriteSafetyEvaluator.should_evaluate_content(file_path):
+            is_safe, reason = WriteSafetyEvaluator.check_content(
+                content, file_path, llm_judge
+            )
+            if not is_safe:
+                return "ask", f"Suspicious Write content: {reason}"
+
+    # Step 1c: NotebookEdit cell content evaluation
+    if tool_name == "NotebookEdit":
+        cell_source = tool_input.get("new_source", "")
+
+        is_safe, reason = NotebookSafetyEvaluator.check_cell_content(
+            cell_source, llm_judge
+        )
+        if not is_safe:
+            return "ask", f"Suspicious notebook cell: {reason}"
 
     # Step 2: Settings deny rules (hard deny)
     for rule in permissions.get("deny", []):
