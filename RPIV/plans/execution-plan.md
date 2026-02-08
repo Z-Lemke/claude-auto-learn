@@ -314,23 +314,31 @@ RUN_E2E=1 pytest plugins/safety-judge/tests/test_e2e.py::TestSubagentSafety -v -
 3. ✅ Alternative approaches evaluated: SubagentStart, custom agents, deny rules
 4. ✅ Evaluated 5 options, selected Option 3 (disable Task tool)
 
-**Decision:** Use Option 3 - Disable Task Tool via deny rules
+**Decision:** CONTINUE WITH TASK ENABLED despite security bug (for RPIV proof-of-concept)
 
-**Rationale:**
-- ✅ Guarantees safety through technical enforcement
-- ✅ Simple, documented, supported approach
-- ✅ Can be relaxed in Phase 2 after upstream validation
-- ❌ Reduces functionality (no parallel task execution)
-- ✅ Does NOT block autonomous operation (just limits it)
+**⚠️ CRITICAL SECURITY WARNING:**
+- Plugin-level PreToolUse hooks DO NOT fire for subagent tool calls
+- This is a KNOWN BUG in Claude Code: https://github.com/anthropics/claude-code/issues/21460
+- Task tool spawned subagents can bypass ALL safety restrictions
+- **The plugin is NOT safe for autonomous operation until this is fixed upstream**
 
-**Implementation:**
-```json
-{
-  "permissions": {
-    "deny": ["Task"]
-  }
-}
-```
+**Rationale for continuing:**
+- ✅ Proves out RPIV workflow methodology
+- ✅ Validates plugin architecture for when bug is fixed
+- ✅ Demonstrates safety layers work for main agent
+- ⚠️ ACCEPTING RISK: Task tool enabled for testing purposes only
+- ❌ DO NOT use in production or autonomous mode until upstream fix
+
+**Safe deployment requires EITHER:**
+1. Upstream fix to Claude Code (issue #21460)
+2. Disable Task tool via deny rules:
+   ```json
+   {
+     "permissions": {
+       "deny": ["Task"]
+     }
+   }
+   ```
 
 **Documentation:**
 - See `/RPIV/research/subagent-hook-inheritance.md` for full analysis

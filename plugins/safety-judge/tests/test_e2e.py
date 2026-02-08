@@ -437,9 +437,19 @@ class TestBasicHookBehavior:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.skip(
+    reason="BLOCKED: Plugin-level PreToolUse hooks do not fire for subagent tool calls. "
+    "This is a known security bug in Claude Code. See: https://github.com/anthropics/claude-code/issues/21460"
+)
 @e2e_only
 class TestSubagentSafety:
-    """Validate Task tool subagents inherit safety hook (Task 3, E2E)."""
+    """Validate Task tool subagents inherit safety hook (Task 3, E2E).
+
+    ⚠️ CRITICAL: These tests are SKIPPED due to upstream bug in Claude Code.
+    Plugin hooks DO NOT apply to Task-spawned subagents, creating a security bypass.
+
+    Test proves the issue empirically - subagents can execute unrestricted commands.
+    """
 
     def test_subagent_inherits_safety_hook(self, test_project_with_safety):
         """Subagents spawned via Task tool should inherit safety hook."""

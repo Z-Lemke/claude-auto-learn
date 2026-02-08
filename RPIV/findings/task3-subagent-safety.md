@@ -1,16 +1,17 @@
 # Task 3: Subagent Safety Validation - Findings
 
-## Status: ✅ COMPLETE WITH MITIGATION
+## Status: ⚠️ COMPLETE - CRITICAL SECURITY BUG IDENTIFIED
 
 ## TL;DR
 
-**Plugin-level PreToolUse hooks DO NOT inherit to subagents. Mitigation: Disable Task tool for Phase 1.**
+**⚠️ CRITICAL: Plugin-level PreToolUse hooks DO NOT inherit to subagents - this is a security bug in Claude Code.**
 
 - ✅ **E2E test EXECUTED**: Successfully forced Task tool usage with parallel task prompt
 - ❌ **CRITICAL FINDING**: Subagent attempted curl, NO safety hook execution observed
 - ✅ **Research COMPLETE**: Analyzed Claude Code documentation, evaluated 5 alternatives
-- ✅ **MITIGATION SELECTED**: Disable Task tool via deny rules (Option 3)
-- ✅ **Phase 1 UNBLOCKED**: Can ship autonomous mode with Task disabled
+- ✅ **UPSTREAM ISSUE FILED**: https://github.com/anthropics/claude-code/issues/21460
+- ⚠️ **CONTINUING WITH TASK ENABLED**: To prove out RPIV workflow (NOT for production use)
+- ❌ **NOT SAFE FOR AUTONOMOUS OPERATION**: Until Claude Code fixes hook inheritance
 
 ## Key Findings
 

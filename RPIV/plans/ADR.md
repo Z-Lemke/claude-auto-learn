@@ -1,7 +1,22 @@
 # Architecture Decision Record: safety-judge Hardening for Autonomous Operation
 
 ## Status
-PROPOSED
+IN PROGRESS - CRITICAL SECURITY LIMITATION IDENTIFIED
+
+## ⚠️ CRITICAL SECURITY WARNING
+
+**Plugin-level PreToolUse hooks DO NOT apply to Task tool subagents due to a bug in Claude Code.**
+
+- **Upstream Issue:** https://github.com/anthropics/claude-code/issues/21460
+- **Impact:** Task-spawned subagents can bypass ALL safety restrictions
+- **Status:** Confirmed via E2E testing, issue filed, awaiting Claude Code team fix
+- **Consequence:** **This plugin is NOT safe for autonomous operation until upstream fix**
+
+**Current approach:** Continuing with RPIV workflow to prove out methodology, but plugin CANNOT be used in production/autonomous mode until Claude Code fixes hook inheritance.
+
+**Safe deployment requires:**
+1. Claude Code fixes issue #21460 (hook inheritance), OR
+2. Disable Task tool via `"deny": ["Task"]` in permissions (eliminates parallel execution)
 
 ## Context
 
