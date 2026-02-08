@@ -21,6 +21,7 @@ import pytest
 # Import the module under test
 sys.path.insert(0, str(Path(__file__).parent.parent / ".claude" / "hooks"))
 from safety_judge import (  # noqa: E402
+    AuditLogger,
     LLMJudge,
     PermissionMatcher,
     RegexDenylist,
@@ -1086,3 +1087,120 @@ class TestNotebookEditSafety:
 
         assert decision == "ask", "Suspicious network request should escalate"
         assert "llm" in reason.lower() or "flagged" in reason.lower()
+
+
+# ---------------------------------------------------------------------------
+# Audit Logging (Task 6)
+# ---------------------------------------------------------------------------
+class TestAuditLogging:
+    """Test audit logging functionality for post-session review."""
+
+    def test_audit_logger_creates_log_file(self, tmp_path):
+        """AuditLogger should create log file if it doesn't exist."""
+        log_path = tmp_path / "audit.log"
+        logger = AuditLogger(log_path=log_path)
+
+        logger.log_decision(
+            session_id="test-123",
+            tool_name="Bash",
+            tool_input={"command": "ls"},
+            decision="allow",
+            reason="Test",
+        )
+
+        assert log_path.exists(), "Log file should be created"
+
+    def test_audit_logger_appends_json_lines(self, tmp_path):
+        """AuditLogger should write one JSON object per line."""
+        log_path = tmp_path / "audit.log"
+        logger = AuditLogger(log_path=log_path)
+
+        logger.log_decision(
+            session_id="test-123",
+            tool_name="Bash",
+            tool_input={"command": "git status"},
+            decision="allow",
+            reason="Allow rule matched",
+            timestamp="2026-01-01T12:00:00Z",
+        )
+
+        logger.log_decision(
+            session_id="test-123",
+            tool_name="Bash",
+            tool_input={"command": "rm -rf /"},
+            decision="deny",
+            reason="Blocked by denylist",
+            timestamp="2026-01-01T12:01:00Z",
+        )
+
+        lines = log_path.read_text().strip().split("\n")
+        assert len(lines) == 2, "Should have 2 log entries"
+
+        # Parse each line as JSON
+        entry1 = json.loads(lines[0])
+        entry2 = json.loads(lines[1])
+
+        assert entry1["decision"] == "allow"
+        assert entry1["tool_name"] == "Bash"
+        assert entry1["tool_input"]["command"] == "git status"
+
+        assert entry2["decision"] == "deny"
+        assert entry2["reason"] == "Blocked by denylist"
+
+    def test_audit_logger_includes_all_fields(self, tmp_path):
+        """Audit log entries should include all required fields."""
+        log_path = tmp_path / "audit.log"
+        logger = AuditLogger(log_path=log_path)
+
+        logger.log_decision(
+            session_id="abc-123",
+            tool_name="Write",
+            tool_input={"file_path": "/tmp/test.sh", "content": "echo hello"},
+            decision="ask",
+            reason="Suspicious file extension",
+            timestamp="2026-01-01T12:00:00Z",
+        )
+
+        entry = json.loads(log_path.read_text().strip())
+
+        # Verify all required fields present
+        assert entry["timestamp"] == "2026-01-01T12:00:00Z"
+        assert entry["session_id"] == "abc-123"
+        assert entry["tool_name"] == "Write"
+        assert entry["tool_input"]["file_path"] == "/tmp/test.sh"
+        assert entry["decision"] == "ask"
+        assert entry["reason"] == "Suspicious file extension"
+
+    def test_audit_logger_auto_timestamp(self, tmp_path):
+        """AuditLogger should auto-generate timestamp if not provided."""
+        log_path = tmp_path / "audit.log"
+        logger = AuditLogger(log_path=log_path)
+
+        logger.log_decision(
+            session_id="test",
+            tool_name="Bash",
+            tool_input={"command": "ls"},
+            decision="allow",
+            reason="Test",
+            # timestamp not provided
+        )
+
+        entry = json.loads(log_path.read_text().strip())
+        assert "timestamp" in entry
+        assert entry["timestamp"].endswith("Z")  # UTC format
+
+    def test_audit_logger_default_path(self, tmp_path):
+        """AuditLogger should default to .claude/safety-audit.log."""
+        with patch.dict(os.environ, {"CLAUDE_PROJECT_DIR": str(tmp_path)}):
+            logger = AuditLogger()
+            expected_path = tmp_path / ".claude" / "safety-audit.log"
+
+            logger.log_decision(
+                session_id="test",
+                tool_name="Bash",
+                tool_input={"command": "ls"},
+                decision="allow",
+                reason="Test",
+            )
+
+            assert expected_path.exists(), f"Should create log at {expected_path}"

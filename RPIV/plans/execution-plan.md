@@ -776,9 +776,30 @@ python plugins/safety-judge/scripts/view-audit.py
 - ✅ Audit log survives across sessions (append-only)
 
 ### Checkboxes
-- [ ] Code Complete
-- [ ] Validated
-- [ ] Reviewed
+- [x] Code Complete
+- [x] Validated
+- [x] Reviewed (self-review: all tests pass)
+
+### RESOLUTION
+
+**Status:** ✅ COMPLETE - All 5 tests pass
+
+**Implementation:**
+- Added `AuditLogger` class with JSON lines format
+- Updated `main()` to log all decisions to `.claude/safety-audit.log`
+- Logs include: timestamp, session_id, tool_name, tool_input, decision, reason
+- Audit logging is fail-safe (doesn't block hook on log errors)
+
+**Test results:** `TestAuditLogging`: 5/5 PASS
+
+**Features:**
+- ✅ Auto-creates log file if missing
+- ✅ Appends JSON lines (one decision per line)
+- ✅ Auto-generates UTC timestamp if not provided
+- ✅ Defaults to `.claude/safety-audit.log` in project directory
+- ✅ All required fields logged
+
+**Test command:** `pytest tests/test_safety_judge.py::TestAuditLogging -v`
 
 ---
 

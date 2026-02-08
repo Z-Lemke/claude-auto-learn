@@ -441,6 +441,56 @@ def enforce_permissions(
     return "ask", "No matching permission rule (default: ask)"
 
 
+class AuditLogger:
+    """Logs safety hook decisions to persistent audit log for post-session review."""
+
+    def __init__(self, log_path: Optional[Path] = None):
+        """Initialize audit logger.
+
+        Args:
+            log_path: Optional custom path. Defaults to .claude/safety-audit.log
+        """
+        if log_path is None:
+            # Default: .claude/safety-audit.log in project directory
+            project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", "."))
+            self.log_path = project_dir / ".claude" / "safety-audit.log"
+        else:
+            self.log_path = Path(log_path)
+
+        # Ensure directory exists
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def log_decision(
+        self,
+        session_id: str,
+        tool_name: str,
+        tool_input: Dict,
+        decision: str,
+        reason: str,
+        timestamp: Optional[str] = None,
+    ):
+        """Append decision to audit log as JSON lines.
+
+        Format: One JSON object per line for easy parsing.
+        """
+        if timestamp is None:
+            from datetime import datetime
+
+            timestamp = datetime.utcnow().isoformat() + "Z"
+
+        entry = {
+            "timestamp": timestamp,
+            "session_id": session_id,
+            "tool_name": tool_name,
+            "tool_input": tool_input,
+            "decision": decision,
+            "reason": reason,
+        }
+
+        with open(self.log_path, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+
+
 def make_hook_response(decision: str, reason: str) -> Optional[str]:
     """Build hook JSON response. Returns None for allow (silent pass-through)."""
     if decision == "allow":
@@ -461,12 +511,22 @@ def main():
     """Hook entry point. Reads from stdin, writes to stdout."""
     try:
         hook_input = json.load(sys.stdin)
+        session_id = hook_input.get("session_id", "unknown")
         tool_name = hook_input.get("tool_name")
         tool_input = hook_input.get("tool_input", {})
 
         decision, reason = enforce_permissions(tool_name, tool_input)
 
+        # Log to stderr (real-time feedback, visible in debug logs)
         print(f"Safety hook: {decision} - {reason}", file=sys.stderr)
+
+        # Log to audit file (persistent record for post-session review)
+        try:
+            logger = AuditLogger()
+            logger.log_decision(session_id, tool_name, tool_input, decision, reason)
+        except Exception as log_error:
+            # Don't fail hook if audit logging fails
+            print(f"Warning: Audit log failed: {log_error}", file=sys.stderr)
 
         response = make_hook_response(decision, reason)
         if response:
