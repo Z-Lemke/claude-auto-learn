@@ -1,0 +1,10 @@
+{
+  "name": "teacher",
+  "version": "0.1.0",
+  "description": "Adaptive teaching agent that builds courses and tutors any text-based subject with spaced repetition, mastery tracking, and Socratic instruction",
+  "author": {
+    "name": "Z-Lemke"
+  },
+  "repository": "https://github.com/Z-Lemke/llm-toolkit",
+  "license": "MIT"
+}

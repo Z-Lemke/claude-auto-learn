@@ -18,6 +18,12 @@
       "description": "PreToolUse safety hook with permission rules and LLM-as-judge for secure autonomous operation",
       "source": "./plugins/safety-judge",
       "category": "security"
+    },
+    {
+      "name": "teacher",
+      "description": "Adaptive teaching agent that builds courses and tutors any text-based subject with spaced repetition and mastery tracking",
+      "source": "./plugins/teacher",
+      "category": "education"
     }
   ]
 }

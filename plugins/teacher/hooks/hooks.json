@@ -1,0 +1,17 @@
+{
+  "description": "Teacher plugin hooks for session tracking and progress updates",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/templates/session-tracker.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
